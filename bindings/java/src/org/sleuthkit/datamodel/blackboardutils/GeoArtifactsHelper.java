@@ -19,9 +19,6 @@
 package org.sleuthkit.datamodel.blackboardutils;
 
 import org.sleuthkit.datamodel.blackboardutils.attributes.GeoTrackPoints;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import org.sleuthkit.datamodel.Blackboard.BlackboardException;
 import org.sleuthkit.datamodel.BlackboardArtifact;
@@ -49,11 +46,11 @@ public final class GeoArtifactsHelper extends ArtifactHelperBase {
 	}
 
 	/**
-	 * Creates and adds a TSK_GPS_TRACK artifact to the case with specified
-	 * attributes and posts the artifact to the Blackboard.
+	 * Add a Track from a GPS device to the database.  A Track represents a series of points that the device
+	 * has traveled on.  This will create a TSK_GPS_TRACK artifact and add it to the case. 
 	 *
-	 * @param trackName	Name of GPS track, not required
-	 * @param points		  GeoTrackPoints, required.
+	 * @param trackName	Name of GPS track, not required.  Pass in null if unknown. 
+	 * @param points	Set of GeoTrackPoints that the track traversed. Required.
 	 *
 	 * @return	TSK_GPS_TRACK artifact
 	 *
@@ -80,76 +77,4 @@ public final class GeoArtifactsHelper extends ArtifactHelperBase {
 
 		return artifact;
 	}
-
-	/**
-	 * Adds a TSK_GPS_TRACKPOINT artifact.
-	 *
-	 * @param latitude    Location latitude, required.
-	 * @param longitude   Location longitude, required.
-	 * @param timeStamp   Date/time trackpoint was recorded, can be 0 if not
-	 *                    available.
-	 * @param name        Trackpoint name, can be empty/null if not available.
-	 * @param programName Name of program that recorded the trackpoint, can be
-	 *                    empty or null if not available.
-	 *
-	 * @return GPS trackpoint artifact added
-	 *
-	 * @throws TskCoreException		  If there is an error creating the artifact.
-	 * @throws BlackboardException	If there is a problem posting the artifact.
-	 */
-	public BlackboardArtifact addGPSTrackpoint(double latitude, double longitude,
-			long timeStamp, String name, String programName) throws TskCoreException, BlackboardException {
-
-		return addGPSTrackpoint(latitude, longitude, timeStamp, name, programName,
-				Collections.emptyList());
-	}
-
-	/**
-	 * Adds a TSK_GPS_TRACKPOINT artifact.
-	 *
-	 * @param latitude            Location latitude, required.
-	 * @param longitude           Location longitude, required.
-	 * @param timeStamp           Date/time the trackpoint was recorded, can be
-	 *                            0 if not available.
-	 * @param name                Trackpoint name, can be empty/null if not
-	 *                            available.
-	 * @param programName         Name of program that recorded the trackpoint,
-	 *                            can be empty or null if not available.
-	 * @param otherAttributesList Other attributes, can be an empty list of no
-	 *                            additional attributes.
-	 *
-	 * @return GPS trackpoint artifact added
-	 *
-	 * @throws TskCoreException		  If there is an error creating the artifact.
-	 * @throws BlackboardException	If there is a problem posting the artifact.
-	 */
-	public BlackboardArtifact addGPSTrackpoint(double latitude, double longitude, long timeStamp, String name, String programName,
-			Collection<BlackboardAttribute> otherAttributesList) throws TskCoreException, BlackboardException {
-
-		BlackboardArtifact gpsTrackpointArtifact;
-		Collection<BlackboardAttribute> attributes = new ArrayList<>();
-
-		// create artifact
-		gpsTrackpointArtifact = getContent().newArtifact(BlackboardArtifact.ARTIFACT_TYPE.TSK_GPS_TRACKPOINT);
-
-		// construct attributes 
-		attributes.add(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LATITUDE, getModuleName(), latitude));
-		attributes.add(new BlackboardAttribute(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_GEO_LONGITUDE, getModuleName(), longitude));
-
-		addAttributeIfNotZero(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_DATETIME, timeStamp, attributes);
-
-		addAttributeIfNotNull(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_NAME, name, attributes);
-		addAttributeIfNotNull(BlackboardAttribute.ATTRIBUTE_TYPE.TSK_PROG_NAME, programName, attributes);
-
-		// add the attributes 
-		attributes.addAll(otherAttributesList);
-		gpsTrackpointArtifact.addAttributes(attributes);
-
-		// post artifact 
-		getSleuthkitCase().getBlackboard().postArtifact(gpsTrackpointArtifact, getModuleName());
-
-		// return the artifact
-		return gpsTrackpointArtifact;
-	}
-
 }
